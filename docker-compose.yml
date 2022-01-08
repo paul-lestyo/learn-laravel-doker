@@ -8,7 +8,7 @@ services:
     image: nginx:stable-alpine
     container_name: nginx
     ports:
-      - "8088:80"
+      - "8080:80"
     volumes:
       - ./src:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -18,15 +18,13 @@ services:
     networks:
       - laravel
 
-  mysql: 
-    image: mysql:5.7.22
+  mysql:
+    image: mysql:5.7.29
     container_name: mysql
     restart: unless-stopped
     tty: true
     ports:
       - "3306:3306"
-    volumes:
-      - ./mysql:/var/lib/mysql
     environment:
       MYSQL_DATABASE: homestead
       MYSQL_USER: homestead
@@ -38,9 +36,9 @@ services:
       - laravel
 
   php:
-    build: 
+    build:
       context: .
-      dockerfile: Dockerfile  
+      dockerfile: Dockerfile
     container_name: php
     volumes:
       - ./src:/var/www/html
@@ -48,13 +46,26 @@ services:
       - "9000:9000"
     networks:
       - laravel
+
+  composer:
+    image: composer:latest
+    container_name: composer
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    networks:
+      - laravel
+
   npm:
-      image: node:13.7
-      container_name: npm
-      volumes:
-        - ./src:/var/www/html
-      working_dir: /var/www/html
-      entrypoint: ['npm']
+    image: node:13.7
+    container_name: npm
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ['npm']
+
   artisan:
     build:
       context: .
